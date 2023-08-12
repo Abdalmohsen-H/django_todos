@@ -1,4 +1,4 @@
-from accounts.models import MyUser
+from accounts.models import User
 from django import forms
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
@@ -17,8 +17,8 @@ class UserCreationForm(forms.ModelForm):
     )
 
     class Meta:
-        model = MyUser
-        fields = ["email", "date_of_birth"]
+        model = User
+        fields = ["email", "user_name"]
 
     def clean_password2(self):
         # Check that the two password entries match
@@ -46,8 +46,8 @@ class UserChangeForm(forms.ModelForm):
     password = ReadOnlyPasswordHashField()
 
     class Meta:
-        model = MyUser
-        fields = ["email", "password", "date_of_birth", "is_active", "is_admin"]
+        model = User
+        fields = ["email", "password", "user_name", "is_active", "is_admin"]
 
 
 class UserAdmin(BaseUserAdmin):
@@ -58,11 +58,11 @@ class UserAdmin(BaseUserAdmin):
     # The fields to be used in displaying the User model.
     # These override the definitions on the base UserAdmin
     # that reference specific fields on auth.User.
-    list_display = ["email", "date_of_birth", "is_admin"]
+    list_display = ["email", "user_name", "is_admin"]
     list_filter = ["is_admin"]
     fieldsets = [
         (None, {"fields": ["email", "password"]}),
-        ("Personal info", {"fields": ["date_of_birth"]}),
+        ("Personal info", {"fields": ["user_name"]}),
         ("Permissions", {"fields": ["is_admin"]}),
     ]
     # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
@@ -72,7 +72,7 @@ class UserAdmin(BaseUserAdmin):
             None,
             {
                 "classes": ["wide"],
-                "fields": ["email", "date_of_birth", "password1", "password2"],
+                "fields": ["email", "user_name", "password1", "password2"],
             },
         ),
     ]
@@ -82,7 +82,7 @@ class UserAdmin(BaseUserAdmin):
 
 
 # Now register the new UserAdmin...
-admin.site.register(MyUser, UserAdmin)
+admin.site.register(User, UserAdmin)
 # ... and, since we're not using Django's built-in permissions,
 # unregister the Group model from admin.
 admin.site.unregister(Group)

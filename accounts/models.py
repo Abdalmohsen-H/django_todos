@@ -4,8 +4,8 @@ from django.db import models
 # Docs: https://docs.djangoproject.com/en/4.2/topics/auth/customizing/
 
 
-class MyUserManager(BaseUserManager):
-    def create_user(self, email, date_of_birth, password=None):
+class UserManager(BaseUserManager):
+    def create_user(self, email, user_name, password=None):
         """
         Creates and saves a User with the given email, date of
         birth and password.
@@ -13,16 +13,19 @@ class MyUserManager(BaseUserManager):
         if not email:
             raise ValueError("Users must have an email address")
 
+        if not user_name:
+            raise ValueError("Users must have a user name")
+
         user = self.model(
             email=self.normalize_email(email),
-            date_of_birth=date_of_birth,
+            user_name=user_name,
         )
 
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, date_of_birth, password=None):
+    def create_superuser(self, email, user_name, password=None):
         """
         Creates and saves a superuser with the given email, date of
         birth and password.
@@ -30,43 +33,28 @@ class MyUserManager(BaseUserManager):
         user = self.create_user(
             email,
             password=password,
-            date_of_birth=date_of_birth,
+            user_name=user_name,
         )
         user.is_admin = True
         user.save(using=self._db)
         return user
 
 
-class MyUser(AbstractBaseUser):
+class User(AbstractBaseUser):
     email = models.EmailField(
         verbose_name="email address",
         max_length=255,
         unique=True,
     )
-    date_of_birth = models.DateField()
+    user_name = models.CharField(verbose_name="user name", max_length=60, unique=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False)
 
-    objects = MyUserManager()
+    objects = UserManager()
 
-    USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["date_of_birth"]
+    USERNAME_FIELD = "user_name"
+    REQUIRED_FIELDS = []
 
     def __str__(self):
-        return self.email
-
-    def has_perm(self, perm, obj=None):
-        "Does the user have a specific permission?"
-        # Simplest possible answer: Yes, always
-        return True
-
-    def has_module_perms(self, app_label):
-        "Does the user have permissions to view the app `app_label`?"
-        # Simplest possible answer: Yes, always
-        return True
-
-    @property
-    def is_staff(self):
-        "Is the user a member of staff?"
-        # Simplest possible answer: All admins are staff
-        return self.is_admin
+        return self.user_name
