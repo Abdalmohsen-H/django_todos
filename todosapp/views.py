@@ -1,5 +1,7 @@
 import json
 
+from django.core import serializers
+
 # Create your views here.
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404
@@ -18,16 +20,9 @@ class TodosListView(View):
     def get(self, request):
         """Handle get request to get all todos"""
         tasks = Task.objects.all()
-        tasksList = [
-            {
-                "id": task.id,
-                "title": task.title,
-                "created_at": task.created_at.isoformat(),
-                "updated_at": task.updated_at.isoformat(),
-            }
-            for task in tasks
-        ]
-        return JsonResponse(tasksList, safe=False, status=200)
+        tasks_serialized = serializers.serialize("json", tasks)
+        tasks_json = json.loads(tasks_serialized)
+        return JsonResponse(tasks_json, safe=False, status=200)
 
     def post(self, request):
         """Handle post request to add todo"""
@@ -56,15 +51,9 @@ class TodosDetailsView(View):
         """Handle get request to get one todo by ID"""
         try:
             task = get_object_or_404(Task, pk=pk)
-            return JsonResponse(
-                {
-                    "id": task.id,
-                    "title": task.title,
-                    "created_at": task.created_at.isoformat(),
-                    "updated_at": task.updated_at.isoformat(),
-                },
-                status=200,
-            )
+            task_serialized = serializers.serialize("json", [task])
+            task_json = json.loads(task_serialized)
+            return JsonResponse(task_json, safe=False, status=200)
         except Http404:
             return JsonResponse({"error": "Invalid Task ID"}, status=404)
 
