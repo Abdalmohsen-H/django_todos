@@ -1,7 +1,5 @@
 import json
 
-from django.core import serializers
-
 # Create your views here.
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404
@@ -10,7 +8,7 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import Task
-from .utils import validate_title
+from .utils import task_serializer, validate_title
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -20,8 +18,7 @@ class TodosListView(View):
     def get(self, request):
         """Handle get request to get all todos"""
         tasks = Task.objects.all()
-        tasks_serialized = serializers.serialize("json", tasks)
-        tasks_json = json.loads(tasks_serialized)
+        tasks_json = task_serializer(tasks)
         return JsonResponse(tasks_json, safe=False, status=200)
 
     def post(self, request):
@@ -51,8 +48,7 @@ class TodosDetailsView(View):
         """Handle get request to get one todo by ID"""
         try:
             task = get_object_or_404(Task, pk=pk)
-            task_serialized = serializers.serialize("json", [task])
-            task_json = json.loads(task_serialized)
+            task_json = task_serializer([task])
             return JsonResponse(task_json, safe=False, status=200)
         except Http404:
             return JsonResponse({"error": "Invalid Task ID"}, status=404)
