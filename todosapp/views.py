@@ -50,7 +50,7 @@ class TodosDetailsView(View):
         try:
             task = Task.objects.get(pk=pk)
             task_json = task_serializer([task])
-            return JsonResponse(task_json, safe=False, status=200)
+            return JsonResponse(task_json[0], safe=False, status=200)
         except ObjectDoesNotExist:
             return JsonResponse({"error": "Invalid Task ID"}, status=404)
 
