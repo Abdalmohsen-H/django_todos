@@ -20,7 +20,9 @@ def task_serializer(tasks):
     """Serialize tasks to json
     argument : tasks must be iterable, ideally a list
     """
-    serialized_data = serializers.serialize("json", tasks)
+    serialized_data = serializers.serialize(
+        "json", tasks, fields=["title", "created_at", "updated_at"]
+    )
     return json.loads(serialized_data)
 
 

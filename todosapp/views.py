@@ -1,8 +1,9 @@
 import json
 
+from django.core.exceptions import ObjectDoesNotExist
+
 # Create your views here.
-from django.http import Http404, JsonResponse
-from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -47,10 +48,10 @@ class TodosDetailsView(View):
     def get(self, request, pk):
         """Handle get request to get one todo by ID"""
         try:
-            task = get_object_or_404(Task, pk=pk)
+            task = Task.objects.get(pk=pk)
             task_json = task_serializer([task])
             return JsonResponse(task_json, safe=False, status=200)
-        except Http404:
+        except ObjectDoesNotExist:
             return JsonResponse({"error": "Invalid Task ID"}, status=404)
 
     def put(self, request, pk):
@@ -59,7 +60,7 @@ class TodosDetailsView(View):
             # title = self.request.POST.get("title")
             request_data = json.loads(request.body)
             title = request_data.get("title")
-            task = get_object_or_404(Task, pk=pk)
+            task = Task.objects.get(pk=pk)
             validation_error = validate_title(title)
             if validation_error:
                 return JsonResponse(validation_error, status=400)
@@ -67,7 +68,7 @@ class TodosDetailsView(View):
                 task.title = title
                 task.save()
                 return JsonResponse({"id": task.id, "title": task.title}, status=200)
-        except Http404:
+        except ObjectDoesNotExist:
             return JsonResponse({"error": "Invalid Task ID"}, status=404)
         except Exception as e:
             return JsonResponse(
@@ -77,8 +78,8 @@ class TodosDetailsView(View):
     def delete(self, request, pk):
         """Handle delete request to remove one todo by ID'"""
         try:
-            task = get_object_or_404(Task, pk=pk)
+            task = Task.objects.get(pk=pk)
             task.delete()
             return JsonResponse({"message": "Task deleted successfully."}, status=204)
-        except Http404:
+        except ObjectDoesNotExist:
             return JsonResponse({"error": "Invalid Task ID"}, status=404)
