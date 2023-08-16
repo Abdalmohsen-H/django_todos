@@ -50,7 +50,7 @@ class TaskViewsTestCase(TestCase):
         response = self.client.get(reverse("TodosDetailsView", args=[self.todo1.pk]))
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content)
-        self.assertEqual(data["title"], self.todo1.title)
+        self.assertEqual(data["fields"]["title"], self.todo1.title)
 
     def test_retrieve_nonexistent_todo(self):
         response = self.client.get(
